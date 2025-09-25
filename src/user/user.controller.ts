@@ -4,6 +4,7 @@ import {
   Delete,
   Controller,
   Patch,
+  Query,
   Param,
   UseGuards,
 } from '@nestjs/common';
@@ -12,6 +13,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { HrGuard } from 'src/common/guards/hr-guard';
 import { UserResponseDto } from './dto/user-response.dto';
+import { FetchUserDto } from './dto/fetch-user.dto';
 
 @Controller('user')
 export class UserController {
@@ -24,13 +26,17 @@ export class UserController {
     @Body() dto: UpdateUserDto,
   ): Promise<UserResponseDto> {
     const user = await this.userService.updateUser(document_no, dto);
-
     return user;
   }
 
   @UseGuards(JwtAuthGuard, HrGuard)
   @Get()
-  async fetchUsers() {}
+  async fetchUsers(
+    @Query() filterDto: FetchUserDto,
+  ): Promise<UserResponseDto[]> {
+    const users = await this.userService.fetchUser(filterDto);
+    return users;
+  }
 
   @UseGuards(JwtAuthGuard, HrGuard)
   @Delete(':document_no')
