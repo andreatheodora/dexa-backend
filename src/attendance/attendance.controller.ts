@@ -1,4 +1,4 @@
-import { Get, Post, Controller, UseGuards, Query } from '@nestjs/common';
+import { Get, Param, Controller, UseGuards, Query } from '@nestjs/common';
 import { AttendanceService } from './attendance.service';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { User } from 'src/common/decorators/user.decorator';
@@ -31,6 +31,16 @@ export class AttendanceController {
   async fetchAttendance(
     @Query() filterDto: FetchAttendanceDto,
   ): Promise<AttendanceResponseDto[]> {
+    return this.attendanceService.fetchAttendance(filterDto);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get(':userDocumentNo')
+  async fetchUserAttendance(
+    @Param('userDocumentNo') docNo: string,
+    @Query() filterDto: FetchAttendanceDto,
+  ): Promise<AttendanceResponseDto[]> {
+    filterDto.user_document_no = docNo;
     return this.attendanceService.fetchAttendance(filterDto);
   }
 }
