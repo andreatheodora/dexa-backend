@@ -107,9 +107,6 @@ export class AttendanceService {
     return new AttendanceResponseDto(updatedAttendance);
   }
 
-  //Upload image
-  async uploadImage() {}
-
   //Get attendance from all users
   //Allow filtering based on date
   //In batches of 15
