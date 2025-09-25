@@ -1,0 +1,36 @@
+import { Get, Post, Controller, UseGuards, Query } from '@nestjs/common';
+import { AttendanceService } from './attendance.service';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { User } from 'src/common/decorators/user.decorator';
+import { AttendanceResponseDto } from './dto/attendance-response.dto';
+import { HrGuard } from 'src/common/guards/hr-guard';
+import { FetchAttendanceDto } from './dto/fetch-attendance.dto';
+
+@Controller('attendance')
+export class AttendanceController {
+  constructor(private attendanceService: AttendanceService) {}
+
+  @UseGuards(JwtAuthGuard)
+  @Get('tap-in')
+  async tapIn(
+    @User('sub') userDocumentNo: string,
+  ): Promise<AttendanceResponseDto> {
+    return this.attendanceService.tapIn(userDocumentNo);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('tap-out')
+  async tapOut(
+    @User('sub') userDocumentNo: string,
+  ): Promise<AttendanceResponseDto> {
+    return this.attendanceService.tapOut(userDocumentNo);
+  }
+
+  @UseGuards(JwtAuthGuard, HrGuard)
+  @Get()
+  async fetchAttendance(
+    @Query() filterDto: FetchAttendanceDto,
+  ): Promise<AttendanceResponseDto[]> {
+    return this.attendanceService.fetchAttendance(filterDto);
+  }
+}

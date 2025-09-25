@@ -12,7 +12,7 @@ export class HrGuard implements CanActivate {
     const user = request.user;
 
     if (!user?.is_hr) {
-      throw new ForbiddenException('Access only for HR personnel');
+      throw new ForbiddenException('Access allowed for HR personnel only');
     }
 
     return true;

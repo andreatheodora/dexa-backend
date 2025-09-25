@@ -15,7 +15,9 @@ export class AttendanceService {
   //Tap in
   async tapIn(user_document_no: string): Promise<AttendanceResponseDto> {
     const user = await this.prisma.user.findUnique({
-      u_document_no: user_document_no,
+      where: {
+        u_document_no: user_document_no,
+      },
     });
 
     if (!user) throw new NotFoundException('User not found');
@@ -24,24 +26,31 @@ export class AttendanceService {
 
     const date = new Date();
 
-    const existingAttendance = await this.prisma.attendance.findOne({
+    const existingAttendance = await this.prisma.attendance.findUnique({
       where: {
-        a_user_document_no: user_document_no,
-        a_year: date.getFullYear(),
-        a_month: date.getMonth() + 1,
-        a_day: date.getDate(),
+        a_u_id_a_year_a_month_a_date: {
+          a_u_id: userId,
+          a_year: date.getFullYear(),
+          a_month: date.getMonth() + 1,
+          a_date: date.getDate(),
+        },
       },
     });
 
     if (existingAttendance) throw new ConflictException('Already tapped in');
 
     const newAttendance = await this.prisma.attendance.create({
-      a_document_no: randomUUID(),
-      a_u_id: userId,
-      a_year: date.getFullYear(),
-      a_month: date.getMonth() + 1,
-      a_day: date.getDate(),
-      a_tap_in: date,
+      data: {
+        a_document_no: randomUUID(),
+        a_u_id: userId,
+        a_year: date.getFullYear(),
+        a_month: date.getMonth() + 1,
+        a_date: date.getDate(),
+        a_tap_in: date,
+      },
+      include: {
+        user: true,
+      },
     });
 
     return new AttendanceResponseDto(newAttendance);
@@ -50,38 +59,52 @@ export class AttendanceService {
   //Tap out
   async tapOut(user_document_no: string): Promise<AttendanceResponseDto> {
     const user = await this.prisma.user.findUnique({
-      u_document_no: user_document_no,
+      where: {
+        u_document_no: user_document_no,
+      },
     });
 
     if (!user) throw new NotFoundException('User not found');
 
     const date = new Date();
 
-    const existingAttendance = await this.prisma.attendance.findFirst({
+    const userId = user.u_id;
+
+    const existingAttendance = await this.prisma.attendance.findUnique({
       where: {
-        a_user_document_no: user_document_no,
-        a_year: date.getFullYear(),
-        a_month: date.getMonth() + 1,
-        a_day: date.getDate(),
+        a_u_id_a_year_a_month_a_date: {
+          a_u_id: userId,
+          a_year: date.getFullYear(),
+          a_month: date.getMonth() + 1,
+          a_date: date.getDate(),
+        },
       },
     });
 
     if (!existingAttendance)
       throw new NotFoundException('User has not tapped in');
 
+    if (existingAttendance.a_tap_out)
+      throw new ConflictException('User already tapped out');
+
     const updatedAttendance = await this.prisma.attendance.update({
       where: {
-        a_user_document_no: user_document_no,
-        a_year: date.getFullYear(),
-        a_month: date.getMonth() + 1,
-        a_day: date.getDate(),
+        a_u_id_a_year_a_month_a_date: {
+          a_u_id: userId,
+          a_year: date.getFullYear(),
+          a_month: date.getMonth() + 1,
+          a_date: date.getDate(),
+        },
       },
       data: {
         a_tap_out: date,
       },
+      include: {
+        user: true,
+      },
     });
 
-    return updatedAttendance;
+    return new AttendanceResponseDto(updatedAttendance);
   }
 
   //Upload image
@@ -92,55 +115,40 @@ export class AttendanceService {
   //In batches of 15
   async fetchAttendance(
     filterDto: FetchAttendanceDto,
-  ): Promise<[AttendanceResponseDto]> {
-    const { year, month, day, page = 1, count = 15 } = filterDto;
-
-    const whereClause: any = {};
-    if (year) whereClause.a_year = year;
-    if (month) whereClause.a_month = month;
-    if (day) whereClause.a_day = day;
-
-    const attendances = await this.prisma.attendance.findMany({
-      whereClause,
-      skip: (page - 1) * count,
-      take: count,
-    });
-
-    return attendances.map(
-      (attendance) => new AttendanceResponseDto(attendance),
-    );
-  }
-
-  //Allow filtering based on date
-  //In batches of 15
-  async fetchAttendanceByUser(
-    filterDto: FetchAttendanceDto,
-  ): Promise<[AttendanceResponseDto]> {
+  ): Promise<AttendanceResponseDto[]> {
     const {
-      user_document_no,
       year,
       month,
-      day,
+      date,
+      user_document_no,
       page = 1,
       count = 15,
     } = filterDto;
 
-    const user = await this.prisma.user.findUnique({
-      u_document_no: user_document_no,
-    });
-
-    if (!user) throw new NotFoundException('User not found');
-
     const whereClause: any = {};
     if (year) whereClause.a_year = year;
     if (month) whereClause.a_month = month;
-    if (day) whereClause.a_day = day;
-    whereClause.a_u_id = user.u_id;
+    if (date) whereClause.a_date = date;
+
+    if (user_document_no) {
+      const user = await this.prisma.user.findUnique({
+        where: {
+          u_document_no: user_document_no,
+        },
+      });
+
+      if (!user) throw new NotFoundException('User not found');
+
+      whereClause.a_u_id = user.u_id;
+    }
 
     const attendances = await this.prisma.attendance.findMany({
-      whereClause,
+      where: whereClause,
       skip: (page - 1) * count,
       take: count,
+      include: {
+        user: true,
+      },
     });
 
     return attendances.map(

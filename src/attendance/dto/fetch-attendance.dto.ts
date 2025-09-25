@@ -1,3 +1,4 @@
+import { Type } from 'class-transformer';
 import { IsInt, IsOptional, IsString, Min } from 'class-validator';
 
 export class FetchAttendanceDto {
@@ -6,23 +7,28 @@ export class FetchAttendanceDto {
   user_document_no?: string;
 
   @IsOptional()
+  @Type(() => Number)
   @IsInt()
   year?: number;
 
   @IsOptional()
+  @Type(() => Number)
   @IsInt()
   month?: number;
 
   @IsOptional()
+  @Type(() => Number)
   @IsInt()
-  day?: number;
+  date?: number;
 
   @IsOptional()
+  @Type(() => Number)
   @IsInt()
   @Min(1)
   page?: number;
 
   @IsOptional()
+  @Type(() => Number)
   @IsInt()
   @Min(1)
   count?: number;

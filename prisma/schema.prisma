@@ -55,7 +55,7 @@ enum Departments {
 
 model attendance {
   a_id          Int         @id @default(autoincrement())
-  a_document_no String?     @unique
+  a_document_no String      @unique
   a_year        Int       
   a_month       Int
   a_date        Int
@@ -64,6 +64,7 @@ model attendance {
   a_image_url   String?
   a_u_id        Int
   user          user        @relation(fields: [a_u_id], references: [u_id], onDelete: Cascade, onUpdate: Cascade)
+  @@unique([a_u_id, a_year, a_month, a_date])
 }
 
 model leave {
