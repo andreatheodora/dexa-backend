@@ -1,6 +1,7 @@
 import {
   Injectable,
   UnauthorizedException,
+  NotFoundException,
   ConflictException,
 } from '@nestjs/common';
 import { randomUUID } from 'crypto';
@@ -58,6 +59,8 @@ export class AuthService {
     });
 
     if (!user) throw new UnauthorizedException('Invalid credentials');
+
+    if (user.u_is_deleted) throw new NotFoundException('User does not exist');
 
     const pwMatches = await argon2.verify(user.u_password, dto.password);
     if (!pwMatches) throw new UnauthorizedException('Invalid credentials');

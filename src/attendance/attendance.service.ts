@@ -134,6 +134,7 @@ export class AttendanceService {
       const user = await this.prisma.user.findUnique({
         where: {
           u_document_no: user_document_no,
+          u_is_deleted: false,
         },
       });
 
@@ -143,7 +144,12 @@ export class AttendanceService {
     }
 
     const attendances = await this.prisma.attendance.findMany({
-      where: whereClause,
+      where: {
+        ...whereClause,
+        user: {
+          u_is_deleted: false,
+        },
+      },
       skip: (page - 1) * count,
       take: count,
       include: {
