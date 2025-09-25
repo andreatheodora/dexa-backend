@@ -51,10 +51,6 @@ export class UpdateUserDto {
   postal_code?: string;
 
   @IsOptional()
-  @IsDateString()
-  updated_at?: string;
-
-  @IsOptional()
   @IsBoolean()
   is_hr?: boolean;
 

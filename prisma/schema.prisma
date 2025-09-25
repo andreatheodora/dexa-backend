@@ -19,17 +19,17 @@ model user {
   u_document_no   String                                                  @unique
   u_email         String                                                  @unique
   u_name          String
-  u_position      Positions
-  u_division      Departments
-  u_salary_gross  Float
-  u_address_line1 String
+  u_position      Positions?
+  u_division      Departments?
+  u_salary_gross  Float?
+  u_address_line1 String?
   u_address_line2 String?
-  u_city          String
-  u_province      String
-  u_postal_code   String
+  u_city          String?
+  u_province      String?
+  u_postal_code   String?
   u_password      String?
   u_created_at    DateTime                                                 @default(now())
-  u_updated_at    DateTime?       
+  u_updated_at    DateTime?                                                @updatedAt      
   u_is_hr         Boolean                                                  @default(false)
   u_is_deleted    Boolean                                                  @default(false)
   Leave_Request_By_User      leave[]                                       @relation("LeaveRequestByUser")
@@ -78,7 +78,7 @@ model leave {
   l_start_year                Int
   l_is_approved               Boolean
   l_created_at                DateTime  @default(now())
-  l_updated_at                DateTime? 
+  l_updated_at                DateTime  @updatedAt
   leave_request_by_user       user      @relation(name: "LeaveRequestByUser", fields: [l_employee_id], references: [u_id], onDelete: Cascade, onUpdate: Cascade)
   leave_approved_by_user      user?     @relation(name: "LeaveApprovedByUser", fields: [l_supervisor_id], references: [u_id], onDelete: SetNull, onUpdate: Cascade)
 

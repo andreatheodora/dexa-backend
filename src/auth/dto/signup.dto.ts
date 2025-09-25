@@ -19,19 +19,19 @@ export class SignupDto {
   name: string;
 
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   position: string;
 
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   division: string;
 
   @IsNumber()
-  @IsNotEmpty()
+  @IsOptional()
   salary_gross: number;
 
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   address_line1: string;
 
   @IsString()
@@ -39,15 +39,15 @@ export class SignupDto {
   address_line2?: string;
 
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   city: string;
 
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   province: string;
 
   @IsNumberString()
-  @IsNotEmpty()
+  @IsOptional()
   postal_code: string;
 
   @IsString()
