@@ -158,4 +158,46 @@ export class AttendanceService {
       (attendance) => new AttendanceResponseDto(attendance),
     );
   }
+
+  async checkAttendanceStatus(user_document_no: string) {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        u_document_no: user_document_no,
+      },
+    });
+
+    if (!user) throw new NotFoundException('User not found');
+
+    const userId = user.u_id;
+
+    const date = new Date();
+
+    const existingAttendance = await this.prisma.attendance.findUnique({
+      where: {
+        a_u_id_a_year_a_month_a_date: {
+          a_u_id: userId,
+          a_year: date.getFullYear(),
+          a_month: date.getMonth() + 1,
+          a_date: date.getDate(),
+        },
+      },
+    });
+
+    if (existingAttendance) {
+      const responseData = {
+        status: existingAttendance.tap_out_time ? 'OUT' : 'IN',
+        tap_in_time: existingAttendance.a_tap_in,
+        ...(existingAttendance.a_tap_out && {
+          tap_out_time: existingAttendance.a_tap_out,
+        }),
+      };
+      return responseData;
+    } else {
+      const responseData = {
+        status: 'OUT',
+        tap_in_time: null,
+      };
+      return responseData;
+    }
+  }
 }

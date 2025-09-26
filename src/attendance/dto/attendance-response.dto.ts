@@ -8,8 +8,10 @@ export class AttendanceResponseDto {
     this.tap_out = attendance.a_tap_out ?? null;
     this.image_url = attendance.a_image_url ?? null;
     this.user_document_no = attendance.user.u_document_no;
+    this.name = attendance.user.u_name ?? null;
   }
   document_no: string;
+  name?: string;
   date: number;
   month: number;
   year: number;

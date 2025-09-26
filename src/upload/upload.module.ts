@@ -6,6 +6,6 @@ import { PrismaService } from 'src/prisma/prisma.service';
 @Module({
   controllers: [UploadController],
   providers: [UploadService, PrismaService],
-  exports: [UploadService], // in case you want to use it elsewhere
+  exports: [UploadService],
 })
 export class UploadModule {}

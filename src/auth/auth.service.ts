@@ -68,7 +68,7 @@ export class AuthService {
     return this.signToken(user.u_document_no, user.u_is_hr);
   }
 
-  async signToken(document_no: string, is_hr: boolean) {
+  private async signToken(document_no: string, is_hr: boolean) {
     const payload = { sub: document_no, is_hr };
 
     const token = await this.jwtService.signAsync(payload, {
@@ -76,6 +76,6 @@ export class AuthService {
       expiresIn: '1h',
     });
 
-    return { access_token: token };
+    return { access_token: token, is_hr };
   }
 }

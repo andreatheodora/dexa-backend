@@ -9,6 +9,8 @@ import {
   IsBoolean,
 } from 'class-validator';
 
+import { Type } from 'class-transformer';
+
 export class UpdateUserDto {
   @IsOptional()
   @IsEmail()
@@ -27,6 +29,7 @@ export class UpdateUserDto {
   division?: string;
 
   @IsOptional()
+  @Type(() => Number)
   @IsNumber()
   salary_gross?: number;
 

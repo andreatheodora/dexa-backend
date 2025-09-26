@@ -9,6 +9,8 @@ import {
   IsOptional,
 } from 'class-validator';
 
+import { Type } from 'class-transformer';
+
 export class SignupDto {
   @IsEmail()
   @IsNotEmpty()
@@ -27,6 +29,7 @@ export class SignupDto {
   division: string;
 
   @IsNumber()
+  @Type(() => Number)
   @IsOptional()
   salary_gross: number;
 

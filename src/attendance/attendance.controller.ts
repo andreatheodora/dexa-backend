@@ -1,4 +1,11 @@
-import { Get, Param, Controller, UseGuards, Query } from '@nestjs/common';
+import {
+  Get,
+  Param,
+  Controller,
+  UseGuards,
+  Query,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { AttendanceService } from './attendance.service';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { User } from 'src/common/decorators/user.decorator';
@@ -24,6 +31,14 @@ export class AttendanceController {
     @User('sub') userDocumentNo: string,
   ): Promise<AttendanceResponseDto> {
     return this.attendanceService.tapOut(userDocumentNo);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('today')
+  async fetchStatus(@User('sub') userDocumentNo: string): Promise<any> {
+    if (!userDocumentNo)
+      throw new UnauthorizedException('NO USER FOUND IN TOKEN');
+    return this.attendanceService.checkAttendanceStatus(userDocumentNo);
   }
 
   @UseGuards(JwtAuthGuard, HrGuard)
