@@ -44,55 +44,135 @@ $ npm run start:dev
 $ npm run start:prod
 ```
 
-## Run tests
+## API Routes
 
-```bash
-# unit tests
-$ npm run test
+All routes except **/auth** are protected with JWT Guard and can only be accessed after logging in.
 
-# e2e tests
-$ npm run test:e2e
+### 1. Auth (/auth)
 
-# test coverage
-$ npm run test:cov
+**1. POST /auth/login**
+
+- Body params:
+  1. email: string
+  2. password: string
+
+**2. POST /auth/signup**
+
+- Body params:
+  1. email: string
+  2. password: string (min. length 8)
+  3. name: string
+  4. position: string (optional)
+  5. division: string (optional)
+  6. salary_gross: number (optional)
+  7. address_line1: string (optional)
+  8. address_line2: string (optional)
+  9. city: string (optional)
+  10. province: string (optional)
+  11. postal_code: string (optional)
+  12. is_hr: boolean
+
+<br>
+
+### 2. Attendance
+
+**1. GET /attendance/tap-in**
+
+- Creates new attendance based on token credentials and server timestamp
+- User can only tap in once per day
+
+**2. GET /attendance/tap-out**
+
+- Adds tap out time to today's attendance based on token credentials and server timestamp
+- User cannot tap out before tapping in
+- User can only tap out once per day
+
+**3. GET /attendance/today**
+<br>Checks user attendance status at a given moment
+
+```json
+//Example when user has tapped in
+{
+  "status": "IN",
+  "tap_in_time": "2025-09-16T08:00:00.000Z"
+}
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+```json
+//Example when user has tapped out for the day
+{
+  "status": "OUT",
+  "tap_in_time": "2025-09-16T08:00:00.000Z",
+  "tap_out_time": "2025-09-16T16:00:00.000Z"
+}
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+**4. GET /attendance**
 
-## Resources
+- HR-only route
+- Returns attendance of active users
+- Query params:
+  1. year: int (optional)
+  2. month: int (optional)
+  3. date: int (optional)
+  4. page: int (optional)
+  5. count: int (optional)
+  6. user_document_no: string (optional)
 
-Check out a few resources that may come in handy when working with NestJS:
+**5. GET /attendance/:user**
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+- Returns user's own attendance
 
-## Support
+- Query params:
+  1. year: int (optional)
+  2. month: int (optional)
+  3. date: int (optional)
+  4. page: int (optional)
+  5. count: int (optional)
+  6. user_document_no: string (optional)
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+<br>
 
-## Stay in touch
+### 3. Upload (/upload)
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+**1. POST /upload/supabase**
 
-## License
+- Uploads image to Supabase and inserts image path to Attendance table
+- Params:
+  1. file: image
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+<br>
+
+### 4. User (/user)
+
+All routes in /user are **HR-only** routes
+
+**1. GET /user**
+
+- Fetches all users
+- Query params:
+  1. document_no: string (optional)
+  2. page: number (optional)
+  3. count: number (optional)
+
+**2. PATCH /user/:user**
+
+- Updates user data
+- Body params:
+  1. email: string (optional)
+  2. password: string (min. length 8) (optional)
+  3. name: string (optional)
+  4. position: string (optional)
+  5. division: string (optional)
+  6. salary_gross: number (optional)
+  7. address_line1: string (optional)
+  8. address_line2: string (optional)
+  9. city: string (optional)
+  10. province: string (optional)
+  11. postal_code: string (optional)
+  12. is_hr: boolean (optional)
+  13. is_deleted: boolean (optional)
+
+**3. DELETE /user/:user**
+
+- Sets `is_deleted` in User table to _true_
