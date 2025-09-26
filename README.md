@@ -176,3 +176,10 @@ All routes in /user are **HR-only** routes
 **3. DELETE /user/:user**
 
 - Sets `is_deleted` in User table to _true_
+
+## Tech Stack
+
+1. **Prisma** - automated database migration
+2. **Supabase** - image storage
+3. **Argon2** - password hashing
+4. **MySql** - database
