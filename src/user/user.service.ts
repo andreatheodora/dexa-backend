@@ -23,6 +23,14 @@ export class UserService {
     return users.map((user) => new UserResponseDto(user));
   }
 
+  async count(): Promise<number> {
+    return await this.prisma.user.count({
+      where: {
+        u_is_deleted: false,
+      },
+    });
+  }
+
   async updateUser(
     document_no: string,
     dto: UpdateUserDto,

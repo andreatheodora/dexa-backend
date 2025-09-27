@@ -6,8 +6,10 @@ import {
   Patch,
   Query,
   Param,
+  Res,
   UseGuards,
 } from '@nestjs/common';
+import type { Response } from 'express';
 import { UserService } from './user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
@@ -31,11 +33,12 @@ export class UserController {
 
   @UseGuards(JwtAuthGuard, HrGuard)
   @Get()
-  async fetchUsers(
-    @Query() filterDto: FetchUserDto,
-  ): Promise<UserResponseDto[]> {
+  async fetchUsers(@Query() filterDto: FetchUserDto, @Res() res: Response) {
+    const total = await this.userService.count();
     const users = await this.userService.fetchUser(filterDto);
-    return users;
+
+    res.setHeader('X-Total-Count', total);
+    return res.json(users);
   }
 
   @UseGuards(JwtAuthGuard, HrGuard)

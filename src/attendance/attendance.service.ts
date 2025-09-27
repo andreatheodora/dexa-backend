@@ -112,7 +112,7 @@ export class AttendanceService {
   //In batches of 15
   async fetchAttendance(
     filterDto: FetchAttendanceDto,
-  ): Promise<AttendanceResponseDto[]> {
+  ): Promise<{ data: AttendanceResponseDto[]; total: number }> {
     const {
       year,
       month,
@@ -154,9 +154,21 @@ export class AttendanceService {
       },
     });
 
-    return attendances.map(
-      (attendance) => new AttendanceResponseDto(attendance),
-    );
+    const total = await this.prisma.attendance.count({
+      where: {
+        ...whereClause,
+        user: {
+          u_is_deleted: false,
+        },
+      },
+    });
+
+    return {
+      data: attendances.map(
+        (attendance) => new AttendanceResponseDto(attendance),
+      ),
+      total,
+    };
   }
 
   async checkAttendanceStatus(user_document_no: string) {

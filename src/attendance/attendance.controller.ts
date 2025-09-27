@@ -4,8 +4,10 @@ import {
   Controller,
   UseGuards,
   Query,
+  Res,
   UnauthorizedException,
 } from '@nestjs/common';
+import type { Response } from 'express';
 import { AttendanceService } from './attendance.service';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { User } from 'src/common/decorators/user.decorator';
@@ -45,10 +47,15 @@ export class AttendanceController {
   @Get()
   async fetchAttendance(
     @Query() filterDto: FetchAttendanceDto,
-  ): Promise<AttendanceResponseDto[]> {
-    return this.attendanceService.fetchAttendance(filterDto);
+    @Res() res: Response,
+  ) {
+    const { data, total } =
+      await this.attendanceService.fetchAttendance(filterDto);
+    res.setHeader('X-Total-Count', total);
+    return res.json(data);
   }
 
+  /*
   @UseGuards(JwtAuthGuard)
   @Get(':userDocumentNo')
   async fetchUserAttendance(
@@ -57,5 +64,5 @@ export class AttendanceController {
   ): Promise<AttendanceResponseDto[]> {
     filterDto.user_document_no = docNo;
     return this.attendanceService.fetchAttendance(filterDto);
-  }
+  }*/
 }
