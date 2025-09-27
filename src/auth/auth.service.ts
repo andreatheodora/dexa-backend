@@ -65,17 +65,17 @@ export class AuthService {
     const pwMatches = await argon2.verify(user.u_password, dto.password);
     if (!pwMatches) throw new UnauthorizedException('Invalid credentials');
 
-    return this.signToken(user.u_document_no, user.u_is_hr);
+    return this.signToken(user.u_document_no, user.u_is_hr, user.u_name);
   }
 
-  private async signToken(document_no: string, is_hr: boolean) {
-    const payload = { sub: document_no, is_hr };
+  private async signToken(document_no: string, is_hr: boolean, name: string) {
+    const payload = { sub: document_no, is_hr, name };
 
     const token = await this.jwtService.signAsync(payload, {
       secret: process.env.JWT_SECRET,
       expiresIn: '1h',
     });
 
-    return { access_token: token, is_hr };
+    return { access_token: token, is_hr, name };
   }
 }
